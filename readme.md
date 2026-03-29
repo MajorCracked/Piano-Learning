@@ -1,4 +1,4 @@
-# 🎹 Piano Learning Lab: Pro Edition
+# 🎹 Piano Learning Lab
 [![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/MajorCracked/Piano-Learning)
 
 This repository contains the source code for the Piano Learning Lab, an AI-powered tool that transforms any piano audio recording (`.wav` or `.mp3`) into a synchronized, interactive visual tutorial. It uses a high-resolution piano transcription model to detect individual notes and timings, then generates a dynamic "falling notes" display similar to Synthesia, paired with an on-screen keyboard.

@@ -110,7 +110,7 @@ def create_musicxml_bytes(transcription_data):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="Piano Learning Lab", layout="wide")
 
-st.title("🎹 Piano Learning Lab:")
+st.title("🎹 Piano Learning Lab")
 st.write("Upload your performance (.wav or .mp3) to generate an interactive, synchronized tutorial.")
 
 uploaded_file = st.file_uploader("Upload .wav or .mp3 performance", type=["wav", "mp3"])
