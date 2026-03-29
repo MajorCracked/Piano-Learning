@@ -5,6 +5,7 @@ import streamlit.components.v1 as components
 import base64
 import io
 import mido
+import music21 as m21
 
 def create_midi_bytes(transcription_data):
     """Converts the cleaned AI transcription into a downloadable MIDI file."""
@@ -31,6 +32,33 @@ def create_midi_bytes(transcription_data):
     midi_buffer = io.BytesIO()
     mid.save(file=midi_buffer)
     return midi_buffer.getvalue()
+
+def create_musicxml_bytes(transcription_data):
+    """Converts AI data into standard MusicXML sheet music."""
+    score = m21.stream.Score()
+    part = m21.stream.Part()
+
+    part.insert(0, m21.meter.TimeSignature('4/4'))
+    part.insert(0, m21.tempo.MetronomeMark(number=120))
+    
+    for item in transcription_data:
+        start_time = item['Start Time (s)']
+        duration_sec = item['End Time (s)'] - start_time
+
+        offset_beats = start_time / 0.5
+        duration_beats = duration_sec / 0.5
+        
+        try:
+            n = m21.note.Note(item['Note'])
+            n.quarterLength = duration_beats
+            part.insert(offset_beats, n)
+        except Exception:
+            continue
+            
+    score.insert(0, part)
+
+    exporter = m21.musicxml.m21ToXml.GeneralObjectExporter(score)
+    return exporter.parse()
 
 from src.polyphonic_engine import transcribe_polyphonic, note_name_to_midi
 
@@ -246,6 +274,7 @@ if uploaded_file is not None:
                 </script>
                 """
                 components.html(html_code, height=900)
+                
                 st.markdown("---")
                 st.subheader("💾 Export Transcription")
                 st.write("Download the AI-filtered notes as a playable MIDI file.")
@@ -258,6 +287,31 @@ if uploaded_file is not None:
                     file_name="cleaned_transcription.mid",
                     mime="audio/midi"
                 )
+
+                st.markdown("---")
+                st.subheader("💾 Export Your Music")
+                st.write("Download the AI's transcription as a playable track or readable sheet music.")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    midi_data = create_midi_bytes(data)
+                    st.download_button(
+                        label="🎵 Download MIDI File",
+                        data=midi_data,
+                        file_name="ai_transcription.mid",
+                        mime="audio/midi",
+                        use_container_width=True
+                    )
+                    
+                with col2:
+                    xml_data = create_musicxml_bytes(data)
+                    st.download_button(
+                        label="🎼 Download Sheet Music (XML)",
+                        data=xml_data,
+                        file_name="ai_sheet_music.xml",
+                        mime="application/vnd.recordare.musicxml",
+                        use_container_width=True
+                    )
 
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
