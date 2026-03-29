@@ -3,6 +3,35 @@ import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
 import base64
+import io
+import mido
+
+def create_midi_bytes(transcription_data):
+    """Converts the cleaned AI transcription into a downloadable MIDI file."""
+    mid = mido.MidiFile(ticks_per_beat=480)
+    track = mido.MidiTrack()
+    mid.tracks.append(track)
+
+    ticks_per_second = 960 
+    
+    events = []
+    for item in transcription_data:
+        pitch = note_name_to_midi(item['Note'])
+        events.append({'time': item['Start Time (s)'], 'type': 'note_on', 'note': pitch, 'vel': 85})
+        events.append({'time': item['End Time (s)'], 'type': 'note_off', 'note': pitch, 'vel': 0})
+
+    events.sort(key=lambda x: x['time'])
+
+    current_time = 0
+    for evt in events:
+        delta_ticks = int((evt['time'] - current_time) * ticks_per_second)
+        track.append(mido.Message(evt['type'], note=evt['note'], velocity=evt['vel'], time=delta_ticks))
+        current_time = evt['time']
+
+    midi_buffer = io.BytesIO()
+    mid.save(file=midi_buffer)
+    return midi_buffer.getvalue()
+
 from src.polyphonic_engine import transcribe_polyphonic, note_name_to_midi
 
 st.set_page_config(page_title="Piano Learning Lab", layout="wide")
@@ -53,7 +82,7 @@ if uploaded_file is not None:
         f.write(audio_bytes)
 
     if st.button("Generate Synchronized Visualization"):
-        with st.spinner("Igniting High-Res Piano AI on your GPU..."):
+        with st.spinner("AI is listening to your audio"):
             
             data = transcribe_polyphonic(
                 temp_audio_path, 
@@ -61,6 +90,8 @@ if uploaded_file is not None:
                 min_duration=duration_slider,
                 max_duration=max_duration_slider
             )
+
+            st.success("Transcription Complete! Rendering visualizer...")
             
             if data:
                 df = pd.DataFrame(data)
@@ -215,6 +246,18 @@ if uploaded_file is not None:
                 </script>
                 """
                 components.html(html_code, height=900)
+                st.markdown("---")
+                st.subheader("💾 Export Transcription")
+                st.write("Download the AI-filtered notes as a playable MIDI file.")
+                
+                midi_data = create_midi_bytes(data)
+                
+                st.download_button(
+                    label="🎵 Download MIDI File",
+                    data=midi_data,
+                    file_name="cleaned_transcription.mid",
+                    mime="audio/midi"
+                )
 
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
