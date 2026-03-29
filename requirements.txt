@@ -4,3 +4,4 @@ torchaudio
 librosa
 piano_transcription_inference
 music21
+demucs
