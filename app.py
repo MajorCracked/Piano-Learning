@@ -36,7 +36,7 @@ from src.polyphonic_engine import transcribe_polyphonic, note_name_to_midi
 
 st.set_page_config(page_title="Piano Learning Lab", layout="wide")
 
-st.title("🎹 Piano Learning Lab: Pro Edition")
+st.title("🎹 Piano Learning Lab:")
 st.write("Upload your performance (.wav or .mp3) to generate an interactive, synchronized tutorial.")
 
 uploaded_file = st.file_uploader("Upload .wav or .mp3 performance", type=["wav", "mp3"])
