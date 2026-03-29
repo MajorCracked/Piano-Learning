@@ -1,0 +1,5 @@
+streamlit
+torch
+torchaudio
+librosa
+piano_transcription_inference
