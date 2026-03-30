@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
@@ -385,3 +386,6 @@ if uploaded_file is not None:
 
     if os.path.exists(temp_audio_path):
         os.remove(temp_audio_path)
+    
+    if os.path.exists("seperated_stems"):
+        shutil.rmtree("seperated_stems")
