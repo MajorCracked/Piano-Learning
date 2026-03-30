@@ -141,6 +141,34 @@ with st.sidebar:
     
     st.markdown("---")
 
+@st.cache_data(show_spinner=False)
+def run_cached_pipeline(file_name, file_bytes, isolate, noise, min_dur, max_dur):
+    """The Vault: Runs the AI and cleans up the server, memorizing the final result."""
+
+    os.makedirs("data", exist_ok=True)
+    temp_path = os.path.join("data", f"temp_{file_name}")
+    with open(temp_path, "wb") as f:
+        f.write(file_bytes)
+
+    if isolate:
+        processing_path = isolate_piano_stem(temp_path)
+    else:
+        processing_path = temp_path
+        
+    transcription_data = transcribe_polyphonic(
+        processing_path,
+        noise_gate=noise, 
+        min_duration=min_dur,
+        max_duration=max_dur
+    )
+
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
+    if os.path.exists("separated_stems"):
+        shutil.rmtree("separated_stems")
+        
+    return transcription_data
+
 if uploaded_file is not None:
     file_ext = uploaded_file.name.split('.')[-1].lower()
     mime_type = "audio/mpeg" if file_ext == "mp3" else "audio/wav"
