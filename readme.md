@@ -57,6 +57,7 @@ This project uses Git LFS to manage the large model file. Please ensure you have
     It is recommended to use a virtual environment.
     ```sh
     pip install -r requirements.txt
+    pip install -r packages.txt
     ```
     *Note: For GPU acceleration, ensure you have a compatible version of PyTorch installed for your CUDA toolkit.*
 
