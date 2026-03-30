@@ -13,7 +13,6 @@ def note_name_to_midi(note_name):
     octave = int(note_name[-1])
     return (octave + 1) * 12 + notes.index(name)
 
-# Added max_duration variable
 def transcribe_polyphonic(audio_path, noise_gate=30, min_duration=0.05, max_duration=1.0):
     print(f"Igniting High-Res Piano AI on {audio_path}...")
     
@@ -55,11 +54,10 @@ def transcribe_polyphonic(audio_path, noise_gate=30, min_duration=0.05, max_dura
                 
             if pitch is not None and start is not None and end is not None:
                 duration = end - start
-                
-                # THE SUSTAIN PEDAL FIX: Force an artificial release
+
                 if duration > max_duration:
                     end = start + max_duration
-                    duration = max_duration # Update duration for the filter below
+                    duration = max_duration
                 
                 if 21 <= pitch <= 108 and velocity >= noise_gate and duration >= min_duration:
                     transcription.append({
